@@ -1,3 +1,14 @@
+Prediction as of : 30 October 2020 (after KXIP v RR, match 50) 
+ team  top 2  top 4 top 2 if (top 4)
+0    mi   0.94   1.00             0.94
+1   rcb   0.54   0.82             0.66
+2    dc   0.53   0.85             0.62
+3  kxip   0.00   0.39                0
+4    rr   0.00   0.36                0
+5   kkr   0.00   0.34                0
+6   srh   0.00   0.24                0
+7   csk   0.00   0.00              N/A
+
 Prediction as of : 30 October 2020 (before KXIP v RR, match 50) 
 
    team  top 2  top 4 top 2 if (top 4)
