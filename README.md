@@ -1,4 +1,4 @@
-# ipl-prediction
+# ipl-prediction based on current standings
 This project is to perform prediction of IPL-2020 standings based on the scores available as of today. 
 We can simulate 10,000 matches with a a prior probability distribution and predict the outcome after all the remaining matches have been played. The current model also takes into account the NRR of a match, and not just the points. This enables a more precise prediction model where we can actually predict which two teams has the highest chance of being in the top 2, and top 4. 
 
