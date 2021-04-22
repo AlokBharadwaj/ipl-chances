@@ -6,12 +6,15 @@ Created on Sun Oct 25 19:01:42 2020
 """
 
 # Program to simulate winning probabilites for the remaining matches in IPLT20 2020 edition
-
+from utils import shorthand
 import numpy as np
 import random
 import matplotlib.pyplot as plt
 from statistics import mode
 import pandas as pd
+from web_scrape import *
+import seaborn as sns
+
 
 class league:
     ''' 
@@ -48,14 +51,29 @@ class league:
            sorted_teams_with_name[i] = [team.name,team.point,team.nrr,team]
        return sorted_teams_with_name
     
-    def get_team_from_id(self,teamid):
+    def get_team_from_id(self,team_id):
         for team in self.teams:
-            if team.id == teamid:
+            if team.id == team_id:
                 return team
     
+    def get_team_from_name(self,team_name):
+        for team in self.teams:
+            if team.name == team_name:
+                return team
     def copy(self):
         copied_list = [team(x.id,x.score,x.nrr,x.name) for x in self.teams]
         return league(copied_list)
+    
+    def get_remaining_matches(self, remaining_match_dictionary):
+        remaining_matches = []
+        for x in schedule_as_of_today.values():
+            team1 = self.get_team_from_name(x[0])
+            team2 = self.get_team_from_name(x[1])
+            prob_team_1 = 0.5
+            prob_team_2 = 0.5
+            remaining_matches.append((team1,team2,prob_team_1,prob_team_2))
+        return remaining_matches
+    
     
     
 class team:
@@ -78,6 +96,9 @@ class team:
     
     def add_nrr(self,nrr):
         self.nrr += nrr
+        
+    def copy(self):
+        return team(self.id, self.point, self.nrr, self.name)
 
 class tournament:
     '''
@@ -133,26 +154,27 @@ def probability_upto_n(teamname,n):
     Calculates the probability of a team being in top 'n' positions
     '''
     
-    p1 = positions[0].count(teamname) / 10000
-    p2 = positions[1].count(teamname) / 10000
-    p3 = positions[2].count(teamname) / 10000
-    p4 = positions[3].count(teamname) / 10000
-    p5 = positions[4].count(teamname) / 10000
-    p6 = positions[5].count(teamname) / 10000
-    p7 = positions[6].count(teamname) / 10000
-    p8 = positions[7].count(teamname) / 10000
+    p1 = positions[0].count(teamname) / number_of_scenarios
+    p2 = positions[1].count(teamname) / number_of_scenarios
+    p3 = positions[2].count(teamname) / number_of_scenarios
+    p4 = positions[3].count(teamname) / number_of_scenarios
+    p5 = positions[4].count(teamname) / number_of_scenarios
+    p6 = positions[5].count(teamname) / number_of_scenarios
+    p7 = positions[6].count(teamname) / number_of_scenarios
+    p8 = positions[7].count(teamname) / number_of_scenarios
     
     p = [p1,p2,p3,p4,p5,p6,p7,p8]
-
+    
     return sum(p[:n])
 
 def probability_at_n(teamname,n):
     '''
     Calculates the probability of a team being at the 'n'th position
     '''
-    p = positions[n].count(teamname) / 10000
-
+    p = positions[n].count(teamname) / number_of_scenarios
+    
     return p
+
 
 
 def get_scenario(tournament_matches):
@@ -176,7 +198,6 @@ def get_scenario(tournament_matches):
     
     return winners,losers
     
-    
 number_of_scenarios = 10000
 winners = {}
 losers = {}
@@ -185,40 +206,27 @@ final_standings = {}
 
 current_standings = {}
 
+standings_today = get_standings()
+schedule_as_of_today = get_schedule()
+
+teams_now = [team(x[0],x[1],x[2],shorthand(x[3])) for x in standings_today.values()]
+
 for i in range(number_of_scenarios):   
-    '''
-    Input the current standings of all the teams 
-    call each team in the following format: 
-    mi = team(team_id, current_points, current_nrr, teamname) and so on
-    '''
-     
-    mi = team(0,16,1.186,'mi')
-    dc = team(1,14,0.030,'dc')
-    rcb = team(2,14,0.048,'rcb')
-    kkr = team(3,12,-0.467,'kkr')
-    kxip = team(4,12,-0.049,'kxip')
-    rr = team(5,10,-0.505,'rr')
-    srh = team(6,10,0.396,'srh')
-    csk = team(7,10,-0.532,'csk')
+    if i/number_of_scenarios*100 % 10 == 0:
+        print(str(round(i/number_of_scenarios*100))+"% of scenarios simulated...")
     
-    teams_list = [mi,dc,rcb,kkr,kxip,rr,srh,csk]
-    teams = league(teams_list)
+    teams = league([x.copy() for x in teams_now])
     
     if i == 0:
         current_standings[i] = teams.standings()
-    
-    remaining_matches_list = [(kkr,kxip,0,1),(srh,dc,0.5,0.5),
-                              (mi,rcb,0.5,0.5),(csk,kkr,0.5,0.5),
-                              (kxip,rr,0.5,0.5),(dc,mi,0.5,0.5),
-                              (rcb,srh,0.5,0.5),(csk,kxip,0.5,0.5),
-                              (kkr,rr,0.5,0.5),(dc,rcb,0.5,0.5),(srh,mi,0.5,0.5)]
+
     
     '''
     After every match, update the index in 'remaingin_matches_list before sending it
     '''
+    remaining_matches_list = teams.get_remaining_matches(schedule_as_of_today)
     
-    
-    ipl2020 = tournament(remaining_matches_list[4:])
+    ipl2020 = tournament(remaining_matches_list)
 
 
     winners[i],losers[i] = get_scenario(ipl2020.get_matches())
@@ -236,7 +244,7 @@ for i in range(number_of_scenarios):
     
     final_standings[i] = teams.standings()
     
-    del teams,mi,dc,rcb,kkr,kxip,rr,srh,csk
+    del teams
             
         
 positions = []
@@ -252,18 +260,19 @@ for pos in range(8):
     teamname = mode(positions[pos])
     rank[pos] = [teamname,round(positions[pos].count(teamname)/number_of_scenarios*100,2)]
 
-teamname_list = [x.name for x in teams_list]
+teamname_list = [x.name for x in teams_now]
     
 overall_team_chances = {}
 team_colors = {
-        'mi':'blue',
-        'dc':'purple',
-        'rcb':'red',
-        'csk':'yellow',
-        'kkr':'black',
-        'rr':'green',
-        'kxip':'pink',
-        'srh':'orange'}
+        'MI':'blue',
+        'DC':'purple',
+        'RCB':'red',
+        'CSK':'yellow',
+        'KKR':'black',
+        'RR':'green',
+        'PK':'pink',
+        'SH':'orange'}
+
 for teamname in teamname_list:
     team_chances = []
     for pos in range(8):
@@ -300,23 +309,27 @@ for teamname in teamname_list:
 
 final_sorted_teamnames = sorted(average_standing,key=average_standing.get,reverse=True)
 
-print('Team\t\t\t Score \t\t\t NRR \n\n')
-for teamname in final_sorted_teamnames:
-    print(teamname+'\t\t\t'+str(average_standing[teamname][0])+'\t\t\t'+str(average_standing[teamname][1]))
+#print('Team\t\t\t Score \t\t\t NRR \n\n')
+#for teamname in final_sorted_teamnames:
+#   print(teamname+'\t\t\t'+str(average_standing[teamname][0])+'\t\t\t'+str(average_standing[teamname][1]))
 
 
-team_chances = []
+team_chances = {}
 for teamname in final_sorted_teamnames:
-    
-    if round(probability_upto_n(teamname,4),2) > 0:
-        top2_if_top4 = round(probability_upto_n(teamname,2)/round(probability_upto_n(teamname,4),2),2)
-    else:
-        top2_if_top4 = 'N/A'
-    team_chances.append([teamname,round(probability_upto_n(teamname,2),2),round(probability_upto_n(teamname,4),2),top2_if_top4])
+    team_chances[teamname] = [round(probability_upto_n(teamname,2),2),round(probability_upto_n(teamname,4),2)]
     #print(teamname+'\t\t\t'+str(round(top_x_chance(teamname,2),2))+'\t\t\t'+str(round(top_x_chance(teamname,4),2)))
 
-topchances_df = pd.DataFrame(team_chances,columns=['team','top 2','top 4','top 2 if (top 4)'])
+topchances_df = pd.DataFrame(team_chances.values(),columns=['top 2','top 4'],index=list(team_chances.keys()))
 display(topchances_df)
-    
-    
-    
+
+
+topchances_df.plot.pie(subplots=True,legend=False,title='Chances of each team qualifying for play-offs', figsize=(20,8))
+
+fig,ax1 = plt.subplots()
+ax1.set_xlabel('Position')
+ax1.set_ylabel('Team')
+
+overall_chances_df = pd.DataFrame(overall_team_chances.values(),columns=np.arange(1,9,1),index=overall_team_chances.keys())
+sns.heatmap(data=overall_chances_df,robust=True,center=50,ax=ax1)
+
+display(overall_chances_df)
