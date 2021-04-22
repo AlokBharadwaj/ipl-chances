@@ -1,6 +1,13 @@
-# ipl-prediction based on current standings
-This project is to perform prediction of IPL-2020 standings based on the scores available as of today. 
-We can simulate 10,000 matches with a a prior probability distribution and predict the outcome after all the remaining matches have been played. The current model also takes into account the NRR of a match, and not just the points. This enables a more precise prediction model where we can actually predict which two teams has the highest chance of being in the top 2, and top 4. 
+# ipl-chances based on current standings
+What chances do each team in IPL have to qualify for play-offs?
+
+IPL standings table gives an indicator of how each teams have performed so far. The points scored by each team mainly decide who gets to qualify for the next round. It is important for viewers to get a sense of how their favorite team is performing, and to know whether they qualify. Initially, the points table help give them an idea but at later stages the points table alone won't be sufficient - especially if your team is in the ranks 3-6. 
+
+So far, newspapers and commmentators give a certain prediction based on the points scored. This approach is not very precise, as for crucial matches the net run rate plays a crucial role. It tells you "how good" a team need to win the remaining matches to qualify. 
+
+This project uses Monte-carlo simulation on both the points and net-run rate to predict the chances each team has to qualify. For each simulated "game" the winner is chosen randomly at 50% probability. The net run rate is assumed to be equally probable between +5 and -5 (this will be updated in the next version). 
+
+---------
 
 Use the following code snippet to change the inputs
 A "matches" variable is a list of tuples in teh following order: 
