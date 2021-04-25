@@ -14,7 +14,8 @@ from statistics import mode
 import pandas as pd
 from web_scrape import *
 import seaborn as sns
-
+from tabulate import tabulate
+from datetime import datetime
 
 class league:
     ''' 
@@ -320,7 +321,7 @@ for teamname in final_sorted_teamnames:
     #print(teamname+'\t\t\t'+str(round(top_x_chance(teamname,2),2))+'\t\t\t'+str(round(top_x_chance(teamname,4),2)))
 
 topchances_df = pd.DataFrame(team_chances.values(),columns=['top 2','top 4'],index=list(team_chances.keys()))
-display(topchances_df)
+#display(topchances_df)
 
 
 topchances_df.plot.pie(subplots=True,legend=False,title='Chances of each team qualifying for play-offs', figsize=(20,8))
@@ -332,4 +333,36 @@ ax1.set_ylabel('Team')
 overall_chances_df = pd.DataFrame(overall_team_chances.values(),columns=np.arange(1,9,1),index=overall_team_chances.keys())
 sns.heatmap(data=overall_chances_df,robust=True,center=50,ax=ax1)
 
-display(overall_chances_df)
+print(overall_chances_df)
+
+time_now = datetime.now()
+# Predictions
+time_string = time_now.strftime("%Y_%m_%d-%H_%M")
+filename = "predictions/prediction_at_"+time_string+".txt"
+
+prediction_file = open(filename,"w")
+
+## PRINT OVERALL PERCENTAGE CHANCES
+prediction_file.write("Predictions as of "+time_string+"\n")
+prediction_file.write("----------------------------------- \n")
+prediction_file.write("Overall chances for teams (%) \n")
+prediction_file.write("Team | Position ---> \n")
+prediction_file.write(" | \n")
+prediction_file.write(" | \n")
+prediction_file.write(" V \n")
+prediction_file.write(tabulate(overall_chances_df,headers='keys',tablefmt='psql'))
+prediction_file.write("\n\n")
+
+## PRINT CHANCES FOR TOP 4
+
+prediction_file.write("Chances of qualifying for playoffs and being in top two \n")
+prediction_file.write(tabulate(topchances_df, headers='keys',tablefmt='psql'))
+prediction_file.write("\n\n")
+
+## PRINT AVERAGE STANDINGS
+
+prediction_file.write("Likely standings \n")
+prediction_file.write(tabulate(average_standing, headers='keys',tablefmt='psql'))
+
+prediction_file.close()
+
