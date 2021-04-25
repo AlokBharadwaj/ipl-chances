@@ -17,6 +17,20 @@ import seaborn as sns
 from tabulate import tabulate
 from datetime import datetime
 
+'''
+past_performance_influence = 'weak'
+all_match_stats,_ = get_IPL_statistics(verbose=False)
+ax = all_match_stats['winner_runs'].plot.kde()
+runs = ax.get_children()[0]._x
+prob = ax.get_children()[0]._y
+
+ax2  = all_match_stats['win_run_rate'].plot.kde()
+
+runrate = ax2.get_children()[0]._x
+probrate = ax2.get_children()[0]._y
+
+'''
+
 class league:
     ''' 
     Creates a league object which have the following properties: "Teams". 
@@ -89,6 +103,8 @@ class team:
     def __init__(self,id,initial_point,initial_nrr,name):
         self.id = id
         self.point = initial_point
+        self.for_runs = 0
+        self.against_runs = 0 
         self.nrr = initial_nrr
         self.name = name
     
@@ -132,6 +148,36 @@ class tournament:
             team2_prob = match[3]
             list_of_matches.append((team1,team2,team1_prob,team2_prob))
         return list_of_matches
+    
+def get_match_result_new(match):
+    ''' 
+    A function which "chooses" the winner of a particular match based on the prior probability
+    of that match
+    
+    suppose a 'match' variable is called with following example: (team1,team2,0.7,0.3)
+    here the probability of team 1 winning is set as 0.7, while that of team 2 is 0.3. 
+    Thus the function returns team 1, with a probaability of 0.7, and team 2 with a 
+    probabilty of 0.3. If this function is called with the same 'match' for 100 times,
+    then the function returns team1  70 times, and team2 30 times (approx)
+    
+    '''
+    teams = np.array([match[0],match[1]])
+    teamA = match[0]
+    teamB = match[1]
+    
+    if past_performance_influence == 'weak':
+        
+        teamA_run = int(np.random.choice(runs,1,replace=False,p=prob))
+        teamB_run = int(np.random.choice(runs,1,replace=False,p=prob))
+        
+        if teamA_run > teamB_run:
+            teamA.for_runs = np.random.choice(runrate,1,replace=False,p=probrate)
+            
+        
+        
+    
+    
+    return np.random.choice(teams,1,replace=False,p=probabilities)[0]    
 
 def get_match_result(match):
     ''' 
@@ -146,6 +192,7 @@ def get_match_result(match):
     
     '''
     teams = np.array([match[0],match[1]])
+    
     probabilities = [match[2],match[3]]
     
     return np.random.choice(teams,1,replace=False,p=probabilities)[0]
@@ -191,7 +238,7 @@ def get_scenario(tournament_matches):
     for i,match in enumerate(tournament_matches):
         team1 = match[0].name
         team2 = match[1].name
-        nrr = random.uniform(0,1)
+        nrr = random.uniform(0,2)
         winner = get_match_result(match)
         loser = [x for x in match[:2] if x.name != winner.name][0]
         winners[i] = [(team1,team2),winner.name,winner.id,nrr]
