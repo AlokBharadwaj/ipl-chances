@@ -172,11 +172,7 @@ def get_match_result_new(match):
         
         if teamA_run > teamB_run:
             teamA.for_runs = np.random.choice(runrate,1,replace=False,p=probrate)
-            
-        
-        
-    
-    
+   
     return np.random.choice(teams,1,replace=False,p=probabilities)[0]    
 
 def get_match_result(match):
@@ -231,7 +227,7 @@ def get_scenario(tournament_matches):
     A scenario is one set of results for all the remaining matches of the tournament
     The input is tournament matches which is apython list of all remaining matches
     For each match the winner and loser is collected and returned as a python dictionary
-    winners{0:winner1,1: winner2,..} where 0, 1, 2 are jjust index 
+    winners{0:winner1,1: winner2,..} where 0, 1, 2 are just index 
     '''
     winners = {}
     losers = {}
@@ -268,7 +264,7 @@ for i in range(number_of_scenarios):
     if i == 0:
         current_standings[i] = teams.standings()
 
-    
+
     '''
     After every match, update the index in 'remaingin_matches_list before sending it
     '''
@@ -293,7 +289,7 @@ for i in range(number_of_scenarios):
     final_standings[i] = teams.standings()
     
     del teams
-            
+    
         
 positions = []
 for position in range(8):
@@ -357,9 +353,9 @@ for teamname in teamname_list:
 
 final_sorted_teamnames = sorted(average_standing,key=average_standing.get,reverse=True)
 
-#print('Team\t\t\t Score \t\t\t NRR \n\n')
-#for teamname in final_sorted_teamnames:
-#   print(teamname+'\t\t\t'+str(average_standing[teamname][0])+'\t\t\t'+str(average_standing[teamname][1]))
+# print('Team\t\t\t Score \t\t\t NRR \n\n')
+# for teamname in final_sorted_teamnames:
+# print(teamname+'\t\t\t'+str(average_standing[teamname][0])+'\t\t\t'+str(average_standing[teamname][1]))
 
 
 team_chances = {}
@@ -369,7 +365,6 @@ for teamname in final_sorted_teamnames:
 
 topchances_df = pd.DataFrame(team_chances.values(),columns=['top 2','top 4'],index=list(team_chances.keys()))
 #display(topchances_df)
-
 
 topchances_df.plot.pie(subplots=True,legend=False,title='Chances of each team qualifying for play-offs', figsize=(20,8))
 
@@ -412,4 +407,3 @@ prediction_file.write("Likely standings \n")
 prediction_file.write(tabulate(average_standing, headers='keys',tablefmt='psql'))
 
 prediction_file.close()
-
